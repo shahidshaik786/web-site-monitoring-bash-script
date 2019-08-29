@@ -257,3 +257,15 @@ fi
 done < "$filename"
 done
 fi
+#######################################################################################################################################################
+#The content of $HOME/scripts/URL_File is as below
+#Please remove "#" and Headline titles. Each parameter will be read by the difrence of spaces.
+#URLoftheSite			Remarks			Domain(0)/IPstatus(1)	Domain_name(without protocol)	PublicIP_1		PublicIP_2	
+#http://myexamplesite.com 	this_is_myexamplesite	1			myexamplesite.com		123.123.123.111		123.123.123.222
+
+
+
+
+
+
+
