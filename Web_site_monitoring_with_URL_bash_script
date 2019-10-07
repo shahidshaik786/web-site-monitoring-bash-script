@@ -1,13 +1,12 @@
 #!/bin/bash
 
 ################Files to be created before starting exicution####################
-# sudo apt-get install alsa alsa-utils			                                		#
-# mkdir -p $HOME/scripts						                                          	#
-# touch $HOME/scripts/URL_File							                                    #
-# touch $HOME/scripts/alert_Data						                                    #
-# touch /tmp/http								                                                #
-# touch /tmp/http_file								                                          #
-# Download alert.wav file and copy it into $HOME/scripts directory		          #
+# sudo apt-get install alsa alsa-utils						#
+# mkdir -p $HOME/scripts							#
+# touch $HOME/scripts/URL_File							#
+# touch $HOME/scripts/alert_Data						#
+# touch /tmp/http								#
+# Download alert.wav file and copy it into $HOME/scripts directory		#
 #################################################################################
 
 ####### checking existing process and creating temp files for URLs###############
@@ -19,16 +18,6 @@ then
 else
 FILE="$HOME/scripts/URL_File"
 myfileval=1
-while read -r line_read; do
-	echo $line_read > /tmp/http_file
-	File_name=$(cat /tmp/http_file | awk -v "val=$myfileval" 'NR==val {print $2}')
-	File_name_val=$(ls /tmp/$File_name 2>/dev/null | wc -l)
-	File_name_val0=0
-	if [ $File_name_val -eq $File_name_val0 ]
-	then 
-		touch /tmp/$File_name
-	fi
-done < "$FILE"
 ####### checking existing process and finding temp files for URLs###############
 echo "############ SCRIPT STARTED WORKING ################"
 echo "############ SCRIPT STARTED WORKING ################" >> $HOME/scripts/alert_Data
@@ -36,15 +25,10 @@ echo " " >> $HOME/scripts/alert_Data
 ####### Continues Loop to check the URLs without break           ###############
 while true
 do
-#######  Reading file URLs                                       ###############
-### URL formate- http or https URL; 
-### remarks; if domain name 0 else 1; 
-### domain without proto(http/https); 
-### Public_1; Public_2; ########
 filename="$HOME/scripts/URL_File" ### file path
 while read -r line; do
         echo $line > /tmp/http ### inserting each line data to temparary file
-### Checking Internet Connection #######
+		### Checking Internet Connection #######
 		while true
 		do
 			if ping -q -c 1 -W 1 8.8.8.8 >/dev/null; 
@@ -55,7 +39,6 @@ while read -r line; do
 			sleep 5  
 		fi
 		done 
-### Checking Internet Connection #######
 	myval=1
 	i=$((i+1))
 	j=7
@@ -64,204 +47,112 @@ while read -r line; do
 	i=$(($l+$k)) ##### Color code 31 to 37
 	echo ""
 	echo ""
-	URL=$(cat /tmp/http |  awk -v "val=$myval" 'NR==val {print $1}')  ### 1st paramater from file. example: http://myabcd.com
-	Server_State=$(cat /tmp/http |  awk -v "val=$myval" 'NR==val {print $2}') ### 2nd paramater from file. example: this_is_myabcd_site
-	val3=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $3}') ### 3rd paramater from file. 0 or 1
-	val4=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $4}') ### 4rd paramater from file. example: myabcd.com
-	val5=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $5}') ### 5th paramater from file. example: 123.123.123.111
-	val6=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $5}') ### 6th paramater from file. example: 123.123.123.222
+	URL=$(cat /tmp/http |  awk -v "val=$myval" 'NR==val {print $3}') ### example: myabcd.com or 123.123.123.111
+	Server_State=$(cat /tmp/http |  awk -v "val=$myval" 'NR==val {print $2}') ### example: this_is_myabcd_site
+	val1=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $1}') ### example: 0 or 1
+	val2=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $4}') ### example: 123.123.123.111 
+	val3=$(cat /tmp/http | awk -v "val=$myfileval" 'NR==val {print $5}') ### example: 123.123.123.222
 echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-echo "\e[1;${i}m| Cheking URL :   $URL                             \e[0m"
+echo "\e[1;${i}m| Cheking URL :   $URL                     			   \e[0m"
 echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-echo "\e[1;${i}m| Cheking URL :   $URL                             \e[0m" >> $HOME/scripts/alert_Data
+echo "\e[1;${i}m| Cheking URL :   $URL                                             \e[0m" >> $HOME/scripts/alert_Data
 DATA=$(date) ### time stamp 
-code=$(curl -s -o /dev/null -w "%{http_code}" $URL) ### getting URL response code
-if [ $code -eq 200 -o $code -eq 301 -o $code -eq 302 ] ### checking with sucessful response codes
-then 
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" 
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-elif [ $code -eq 404 -o $code -eq 500 ] ### checking with error response codes
-then 
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| URL IS DOWN :   $URL                             \e[0m"
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| DOWN TIME   :   $DATA                            \e[0m"
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| HTTP TIME   :   $code                            \e[0m"
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
-	echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m"
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| URL IS DOWN :   $URL                             \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| DOWN TIME   :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| HTTP CODE   :   $code                            \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-	echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-	aplay $HOME/scripts/alert.wav 2> /dev/null ### On failure buzzer will sound
-	/usr/bin/truncate -s 0 /tmp/$Server_State  ### truncate the file with server failure count data
-	echo " Dear Admin Team \n The $URL is DOWN for the State $Server_State. The HTTP response code is $code " | mail -s "$Server_State is down" -a "From: from@mail.com" yourmail1@mail.com,yourmail2@mail.com >> /dev/null   ### On failure sending mail
-elif [ $code -eq 000 ]
+if [ $val1 -eq 0 ]
 then
-   LNUM=$(cat /tmp/$Server_State | wc -l)
-   LNUM0=0
-   oval=0
-	if [ $val3 -eq $oval ] ### checking Domain or Public IP
-	then
-	dname=$(nslookup $val4 | awk '/^Address: /{print $2}') ### getting domain name Public IPs
-		for dname_i in $dname
-		do
-			dname_url="http://$dname_i/" ### Making Public IP as http URL
-			dname_code=$(curl -s -o /dev/null -w "%{http_code}" $dname_url)  ### getting public IP response
-			if [ $dname_code -eq 200 -o $dname_code -eq 301 -o $dname_code -eq 302 ]  ### If success response
-			then
-			echo "\e[1;${i}m---------------------------------------------------\e[0m"
-			echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
-			echo "\e[1;${i}m---------------------------------------------------\e[0m"
-			echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
-			echo "\e[1;${i}m---------------------------------------------------\e[0m" 
-			echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-			echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-			echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-			echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-			echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-			else #### if did not success response 
-					if [ $LNUM -eq $LNUM0 ] ### If no failure count, then add the failure count from 1
-						then
-						echo "$Server_State 0" > /tmp/$Server_State
-						else 
-						ALT=$(cat /tmp/$Server_State |  awk -v "val=$myval" 'NR==val {print $2}')  ### server failure count
-						ALT5=5
-						if [ $ALT -eq $ALT5 ] ### If failure count is 5 then alert with sound and send mail
-						then
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| URL IS DOWN :   $URL                             \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| DOWN TIME   :   $DATA                            \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| HTTP CODE   :   $code                            \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| Server State:   $Server_State                    \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| URL IS DOWN :   $URL                             \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| DOWN TIME   :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| HTTP CODE   :   $code                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						aplay $HOME/scripts/alert.wav 2> /dev/null  ### On failure buzzer will sound
-						/usr/bin/truncate -s 0 /tmp/$Server_State   ### truncate the file with server failure count data
-						echo " Dear Admin Team \n The $URL is DOWN for the State $Server_State. The HTTP response code is $code " | mail -s "$Server_State is down" -a "From: from@mail.com" yourmail1@mail.com,yourmail2@mail.com >> /dev/null   ### On failure sending mail 
-						else
-						ALT=$((ALT+1)) ### increase server failure count
-						echo "$Server_State $ALT" > /tmp/$Server_State
-						fi
-						fi
-					fi
-					done
-					oval1=1
-					elif [ $val3 -eq $oval1 ]   ### No domain name backup public IPs are there
-					then
-						if [ "$val5" != "" ]  ### first Public IP of diffrent ISP
-						then 
-						dname_url="http://$val5/" ### making URL with public IP
-						dname_code=$(curl -s -o /dev/null -w "%{http_code}" $dname_url)   ### getting response code
-						if [ $dname_code -eq 200 -o $dname_code -eq 301 -o $dname_code -eq 302 ] ### validating response code
-						then
-						echo "\e[1;${i}m---------------------------------------------------\e[0m"
-						echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
-						echo "\e[1;${i}m---------------------------------------------------\e[0m"
-						echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" 
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						elif [ "$val6" != "" ]  ### second Public IP of diffrent ISP
-						then 
-						dname_url="http://$val6/" ### making URL with public IP
-						dname_code=$(curl -s -o /dev/null -w "%{http_code}" $dname_url)   ### getting response code
-						if [ $dname_code -eq 200 -o $dname_code -eq 301 -o $dname_code -eq 302 ] ### validating response code
-						then
-						echo "\e[1;${i}m---------------------------------------------------\e[0m"
-						echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
-						echo "\e[1;${i}m---------------------------------------------------\e[0m"
-						echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" 
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						else
-						if [ $LNUM -eq $LNUM0 ]
-						then
-						echo "$Server_State 0" > /tmp/$Server_State
-						else
-						ALT=$(cat /tmp/$Server_State |  awk -v "val=$myval" 'NR==val {print $2}')  ### server failure count
-						ALT5=5
-						if [ $ALT -eq $ALT5 ]
-						then
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| URL IS DOWN :   $URL                             \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| DOWN TIME   :   $DATA                            \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| HTTP CODE   :   $code                            \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m"
-						echo "\e[0;${i}m| Server State:   $Server_State                    \e[0m"
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| URL IS DOWN :   $URL                             \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| DOWN TIME   :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| HTTP CODE   :   $code                            \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
-						echo "\e[0;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
-						aplay $HOME/scripts/alert.wav 2> /dev/null
-						/usr/bin/truncate -s 0 /tmp/$Server_State
-						echo " Dear Admin Team \n The $URL is DOWN for the State $Server_State. The HTTP response code is $code " | mail -s "$Server_State is down" -a "From: from@mail.com" yourmail1@mail.com,yourmail2@mail.com >> /dev/null   ### On failure sending mail
-						else
-						ALT=$((ALT+1))
-						echo "$Server_State $ALT" > /tmp/$Server_State
-						fi
-					fi
-				fi
-			fi
+	dname=$(nslookup $URL | awk '/^Address: /{print $2}') ### getting domain name Public IPs
+	for dname_i in $dname
+	do
+		#echo "first for loop dname_i is $dname_i"
+		dname_url="http://$dname_i/" ### Making Public IP as http URL
+		code=$(curl -s -o /dev/null -w "%{http_code}" $dname_url)  ### getting public IP response	
+		if [ $code -eq 200 -o $code -eq 301 -o $code -eq 302 ] ### checking with sucessful response codes
+		then 
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" 
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| UP TIME     :   $DATA                                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| Server State:   $Server_State                                    \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		break
+		elif [ $code -eq 404 -o $code -eq 500 ] ### checking with error response codes
+		then 
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| URL IS DOWN :   $URL                                             \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| DOWN TIME   :   $DATA                                            \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| HTTP TIME   :   $code                                            \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| Server State:   $Server_State                                    \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| URL IS DOWN :   $URL                                             \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| DOWN TIME   :   $DATA                                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| HTTP CODE   :   $code                                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| Server State:   $Server_State                                    \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		aplay $HOME/scripts/alert.wav 2> /dev/null ### On failure buzzer will sound
+		/usr/bin/truncate -s 0 /tmp/$Server_State  ### truncate the file with server failure count data
+		echo " Dear Admin Team \n The $URL is DOWN for the State $Server_State. The HTTP response code is $code " | mail -s "$Server_State is down" -a "From: from_mail_id@gmail.com" your_admin_1@gmail.com,your_admin_2@gmail.com >> /dev/null   ### On failure sending mail
+fi
+done
+else
+ 	for ipadd in $URL $val2 $val3
+	do
+		dname_url="http://$ipadd/" ### making URL with public IP
+		dname_code=$(curl -s -o /dev/null -w "%{http_code}" $dname_url)   ### getting response code
+		if [ $dname_code -eq 200 -o $dname_code -eq 301 -o $dname_code -eq 302 ] ### validating response code
+		then
+		echo "\e[1;${i}m---------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m"
+		echo "\e[1;${i}m---------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" 
+		echo "\e[1;${i}m---------------------------------------------------\e[0m" 
+		echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| UP TIME     :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		break
+		elif [ $code -eq 404 -o $code -eq 500 ] ### checking with error response codes
+		then
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| URL IS DOWN :   $URL                             \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| DOWN TIME   :   $DATA                            \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| HTTP TIME   :   $code                            \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
+		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m"
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| URL IS DOWN :   $URL                             \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| DOWN TIME   :   $DATA                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| HTTP CODE   :   $code                            \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
+		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
+		aplay $HOME/scripts/alert.wav 2> /dev/null ### On failure buzzer will sound
+		/usr/bin/truncate -s 0 /tmp/$Server_State  ### truncate the file with server failure count data
+		echo " Dear Admin Team \n The $URL is DOWN for the State $Server_State. The HTTP response code is $code " | mail -s "$Server_State is down" -a "From: from_mail_id@gmail.com" your_admin_1@gmail.com,your_admin_2@gmail.com >> /dev/null   ### On failure sending mail
 		fi
-	fi
-fi
-sleep 4
-vl=1
-pdate=$(ls -l $HOME/scripts/alert_Data | awk -v "val=$vl" 'NR==val {print $7}')   ### getting file created day
-ddate=$(date | awk -v "val=$vl" 'NR==val {print $3}') ### current day count
-if [ $pdate -gt $ddate ]  ### validating file created day and current
-then 
-d=`date +%m-%d-%Y`
-mv $HOME/scripts/alert_Data $HOME/scripts/alert_Data$d  ### taking backup of existing file with time stamp
-touch $HOME/scripts/alert_Data ### creating new file
-fi
+	done
+		fi
 done < "$filename"
 done
 fi
 #######################################################################################################################################################
 #The content of $HOME/scripts/URL_File is as below
 #Please remove "#" and Headline titles. Each parameter will be read by the difrence of spaces.
-#URLoftheSite			Remarks			Domain(0)/IPstatus(1)	Domain_name(without protocol)	PublicIP_1		PublicIP_2	
-#http://myexamplesite.com 	this_is_myexamplesite	1			myexamplesite.com		123.123.123.111		123.123.123.222
+#Domain(0)/IPstatus(1)		Remarks				URLoftheSite			PublicIP_1		PublicIP_2	
+#     1				this_is_myexamplesite		http://myexamplesite.com 	123.123.123.111		123.123.123.222
 
 
 
