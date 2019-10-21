@@ -2,6 +2,8 @@
 
 ################Files to be created before starting exicution####################
 # sudo apt-get install alsa alsa-utils						#
+# sudo apt-get install postfix mailutils                                        #
+# https://kifarunix.com/configure-postfix-to-use-gmail-smtp-on-ubuntu-18-04/    #
 # mkdir -p $HOME/scripts							#
 # touch $HOME/scripts/URL_File							#
 # touch $HOME/scripts/alert_Data						#
