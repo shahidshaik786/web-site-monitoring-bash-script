@@ -80,7 +80,7 @@ then
 		echo "\e[1;${i}m| Server State:   $Server_State                                    \e[0m" >> $HOME/scripts/alert_Data
 		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
 		break
-		elif [ $code -eq 404 -o $code -eq 500 ] ### checking with error response codes
+		elif [ $code -eq 404 -o $code -eq 500  -o $code -eq 000 ] ### checking with error response codes
 		then 
 		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
 		echo "\e[1;${i}m| URL IS DOWN :   $URL                                             \e[0m"
@@ -122,7 +122,7 @@ else
 		echo "\e[1;${i}m| Server State:   $Server_State                    \e[0m" >> $HOME/scripts/alert_Data
 		echo "\e[1;${i}m---------------------------------------------------\e[0m" >> $HOME/scripts/alert_Data
 		break
-		elif [ $code -eq 404 -o $code -eq 500 ] ### checking with error response codes
+		elif [ $code -eq 404 -o $code -eq 500 -o $code -eq 000  ] ### checking with error response codes
 		then
 		echo "\e[1;${i}m-------------------------------------------------------------------\e[0m"
 		echo "\e[1;${i}m| URL IS DOWN :   $URL                             \e[0m"
